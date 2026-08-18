@@ -10,6 +10,7 @@ import {
   useCreateProcessStepMutation,
   useDeleteProcessStepMutation,
 } from "../../redux/api/processStepApi"
+import { toFormData } from "../../utils/toFormData"
 
 // Keep in sync with the enum in server/model/ProcessStep.js and the
 // ICON_MAP in client/src/pages/About.jsx.
@@ -26,7 +27,7 @@ const AdminProcessSteps = () => {
   const steps = data?.data || []
 
   const handleSubmit = (values, { resetForm }) => {
-    const payload = { ...values, order: values.order ? Number(values.order) : 0 }
+    const payload = toFormData({ ...values, order: values.order ? Number(values.order) : 0 })
     createProcessStep(payload)
       .unwrap()
       .then(() => {

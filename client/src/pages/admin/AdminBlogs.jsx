@@ -6,6 +6,7 @@ import ImageUploadField from "../../components/forms/ImageUploadField"
 import Button from "../../components/common/Button"
 import Loader from "../../components/common/Loader"
 import { useGetAllBlogsQuery, useCreateBlogMutation, useDeleteBlogMutation } from "../../redux/api/blogApi"
+import { toFormData } from "../../utils/toFormData"
 
 const slugify = (text) =>
   text
@@ -25,11 +26,11 @@ const AdminBlogs = () => {
   const blogs = data?.data || []
 
   const handleSubmit = (values, { resetForm }) => {
-    const payload = {
+    const payload = toFormData({
       ...values,
       slug: values.slug || slugify(values.title),
       tags: values.tags ? values.tags.split(",").map((s) => s.trim()).filter(Boolean) : [],
-    }
+    })
     createBlog(payload)
       .unwrap()
       .then(() => {

@@ -1,4 +1,5 @@
 const Blog = require('../model/Blog');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // @desc    Create blog
 // @route   POST /api/blogs
@@ -16,7 +17,26 @@ const createBlog = async (req, res) => {
             });
         }
 
-        const blog = await Blog.create(req.body);
+        const data = { ...req.body };
+
+        // If an image file came in (multipart/form-data), push it to Cloudinary
+        // right here and store the returned secure URL on the blog.
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/blogs');
+            data.coverImage = result.secure_url;
+        }
+
+        // multipart/form-data only carries text fields, so array fields arrive
+        // JSON-encoded — decode them back before handing off to Mongoose.
+        if (typeof data.tags === 'string') {
+            try {
+                data.tags = JSON.parse(data.tags);
+            } catch {
+                data.tags = [];
+            }
+        }
+
+        const blog = await Blog.create(data);
 
         res.status(201).json({
             success: true,
@@ -99,7 +119,22 @@ const getBlogBySlug = async (req, res) => {
 // @access  Private/Admin
 const updateBlog = async (req, res) => {
     try {
-        const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
+        const data = { ...req.body };
+
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/blogs');
+            data.coverImage = result.secure_url;
+        }
+
+        if (typeof data.tags === 'string') {
+            try {
+                data.tags = JSON.parse(data.tags);
+            } catch {
+                data.tags = [];
+            }
+        }
+
+        const blog = await Blog.findByIdAndUpdate(req.params.id, data, {
             new: true,
             runValidators: true,
         });

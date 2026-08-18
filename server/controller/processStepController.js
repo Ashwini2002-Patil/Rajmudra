@@ -1,20 +1,30 @@
 const ProcessStep = require('../model/ProcessStep');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // @desc    Add process step
 // @route   POST /api/process-steps
 // @access  Private/Admin
 const createProcessStep = async (req, res) => {
     try {
-        const { title, description, image } = req.body;
+        const { title, description } = req.body;
 
-        if (!title || !description || !image) {
+        const data = { ...req.body };
+
+        // If an image file came in (multipart/form-data), push it to Cloudinary
+        // right here and store the returned secure URL on the process step.
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/process-steps');
+            data.image = result.secure_url;
+        }
+
+        if (!title || !description || !data.image) {
             return res.status(400).json({
                 success: false,
                 message: 'Please fill all required fields: title, description, image',
             });
         }
 
-        const step = await ProcessStep.create(req.body);
+        const step = await ProcessStep.create(data);
 
         res.status(201).json({
             success: true,

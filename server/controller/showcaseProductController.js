@@ -1,20 +1,40 @@
 const ShowcaseProduct = require('../model/ShowcaseProduct');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // @desc    Add showcase product
 // @route   POST /api/showcase-products
 // @access  Private/Admin
 const createShowcaseProduct = async (req, res) => {
     try {
-        const { title, description, image } = req.body;
+        const { title, description } = req.body;
 
-        if (!title || !description || !image) {
+        const data = { ...req.body };
+
+        // If an image file came in (multipart/form-data), push it to Cloudinary
+        // right here and store the returned secure URL on the showcase product.
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/showcase-products');
+            data.image = result.secure_url;
+        }
+
+        // multipart/form-data only carries text fields, so array fields arrive
+        // JSON-encoded — decode them back before handing off to Mongoose.
+        if (typeof data.specs === 'string') {
+            try {
+                data.specs = JSON.parse(data.specs);
+            } catch {
+                data.specs = [];
+            }
+        }
+
+        if (!title || !description || !data.image) {
             return res.status(400).json({
                 success: false,
                 message: 'Please fill all required fields: title, description, image',
             });
         }
 
-        const item = await ShowcaseProduct.create(req.body);
+        const item = await ShowcaseProduct.create(data);
 
         res.status(201).json({
             success: true,

@@ -10,6 +10,7 @@ import {
   useCreateShowcaseProductMutation,
   useDeleteShowcaseProductMutation,
 } from "../../redux/api/showcaseProductApi"
+import { toFormData } from "../../utils/toFormData"
 
 const initialValues = {
   title: "",
@@ -37,7 +38,7 @@ const AdminShowcaseProducts = () => {
       specPackaging && { label: "Packaging", value: specPackaging },
     ].filter(Boolean)
 
-    createShowcaseProduct({ ...rest, specs, order: order ? Number(order) : 0 })
+    createShowcaseProduct(toFormData({ ...rest, specs, order: order ? Number(order) : 0 }))
       .unwrap()
       .then(() => {
         resetForm()

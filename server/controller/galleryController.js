@@ -1,4 +1,5 @@
 const Gallery = require('../model/Gallery');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // @desc    Add gallery item
 // @route   POST /api/gallery
@@ -7,16 +8,23 @@ const createGalleryItem = async (req, res) => {
     try {
         console.log('Gallery request body:', req.body);
 
-        const { imageUrl } = req.body;
+        const data = { ...req.body };
 
-        if (!imageUrl) {
+        // If an image file came in (multipart/form-data), push it to Cloudinary
+        // right here and store the returned secure URL on the gallery item.
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/gallery');
+            data.imageUrl = result.secure_url;
+        }
+
+        if (!data.imageUrl) {
             return res.status(400).json({
                 success: false,
                 message: 'Please provide required field: imageUrl',
             });
         }
 
-        const item = await Gallery.create(req.body);
+        const item = await Gallery.create(data);
 
         res.status(201).json({
             success: true,

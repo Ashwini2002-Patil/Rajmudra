@@ -11,6 +11,7 @@ import {
   useDeleteProductMutation,
 } from "../../redux/api/productApi"
 import { PRODUCT_CATEGORIES } from "../../utils/constants"
+import { toFormData } from "../../utils/toFormData"
 
 const initialValues = {
   name: "",
@@ -33,14 +34,14 @@ const AdminProducts = () => {
 
   const handleSubmit = (values, { resetForm }) => {
     const { image, ...rest } = values
-    const payload = {
+    const payload = toFormData({
       ...rest,
+      image, // File — the product controller uploads it to Cloudinary itself
       price: values.price ? Number(values.price) : undefined,
-      images: image ? [image] : [],
       packagingOptions: values.packagingOptions
         ? values.packagingOptions.split(",").map((s) => s.trim()).filter(Boolean)
         : [],
-    }
+    })
     createProduct(payload)
       .unwrap()
       .then(() => {
