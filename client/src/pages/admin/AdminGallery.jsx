@@ -10,6 +10,7 @@ import {
   useCreateGalleryItemMutation,
   useDeleteGalleryItemMutation,
 } from "../../redux/api/galleryApi"
+import { toFormData } from "../../utils/toFormData"
 
 const initialValues = { title: "", imageUrl: "", category: "" }
 
@@ -22,7 +23,7 @@ const AdminGallery = () => {
   const items = data?.data || []
 
   const handleSubmit = (values, { resetForm }) => {
-    createGalleryItem(values)
+    createGalleryItem(toFormData(values))
       .unwrap()
       .then(() => {
         resetForm()

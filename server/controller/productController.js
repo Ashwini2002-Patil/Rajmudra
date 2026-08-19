@@ -1,4 +1,5 @@
 const Product = require('./../model/Projuct');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // @desc    Create product
 // @route   POST /api/products
@@ -16,7 +17,26 @@ const createProduct = async (req, res) => {
             });
         }
 
-        const product = await Product.create(req.body);
+        const data = { ...req.body };
+
+        // If an image file came in (multipart/form-data), push it to Cloudinary
+        // right here and store the returned secure URL on the product.
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/products');
+            data.images = [result.secure_url];
+        }
+
+        // multipart/form-data only carries text fields, so array fields arrive
+        // JSON-encoded — decode them back before handing off to Mongoose.
+        if (typeof data.packagingOptions === 'string') {
+            try {
+                data.packagingOptions = JSON.parse(data.packagingOptions);
+            } catch {
+                data.packagingOptions = [];
+            }
+        }
+
+        const product = await Product.create(data);
 
         res.status(201).json({
             success: true,
@@ -95,7 +115,22 @@ const getProductById = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
     try {
-        const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+        const data = { ...req.body };
+
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/products');
+            data.images = [result.secure_url];
+        }
+
+        if (typeof data.packagingOptions === 'string') {
+            try {
+                data.packagingOptions = JSON.parse(data.packagingOptions);
+            } catch {
+                data.packagingOptions = [];
+            }
+        }
+
+        const product = await Product.findByIdAndUpdate(req.params.id, data, {
             new: true,
             runValidators: true,
         });

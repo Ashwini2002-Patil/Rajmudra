@@ -1,4 +1,5 @@
 const Certification = require('../model/Certification');
+const { uploadBuffer } = require('../utils/cloudinary');
 
 // @desc    Add certification
 // @route   POST /api/certifications
@@ -16,7 +17,16 @@ const createCertification = async (req, res) => {
             });
         }
 
-        const certification = await Certification.create(req.body);
+        const data = { ...req.body };
+
+        // If an image file came in (multipart/form-data), push it to Cloudinary
+        // right here and store the returned secure URL on the certification.
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/certifications');
+            data.certificateImage = result.secure_url;
+        }
+
+        const certification = await Certification.create(data);
 
         res.status(201).json({
             success: true,
@@ -66,7 +76,14 @@ const getAllCertifications = async (req, res) => {
 // @access  Private/Admin
 const updateCertification = async (req, res) => {
     try {
-        const certification = await Certification.findByIdAndUpdate(req.params.id, req.body, {
+        const data = { ...req.body };
+
+        if (req.file) {
+            const result = await uploadBuffer(req.file.buffer, 'rajmudar/certifications');
+            data.certificateImage = result.secure_url;
+        }
+
+        const certification = await Certification.findByIdAndUpdate(req.params.id, data, {
             new: true,
             runValidators: true,
         });

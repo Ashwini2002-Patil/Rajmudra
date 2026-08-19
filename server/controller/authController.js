@@ -16,10 +16,15 @@ const generateToken = (admin) => {
 };
 
 const sendTokenCookie = (res, token) => {
+    const isProd = process.env.NODE_ENV === 'production';
     res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        // In production the client and server are hosted on different domains,
+        // so the cookie must be sameSite:'none' (which requires secure:true) or
+        // the browser silently drops it on every cross-site request — including
+        // the image-upload calls, which then 401 and never reach Cloudinary.
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 };
@@ -217,7 +222,12 @@ const verifyLoginOtp = async (req, res) => {
 // @route   POST /api/auth/logout
 // @access  Private
 const logoutAdmin = (req, res) => {
-    res.clearCookie('token');
+    const isProd = process.env.NODE_ENV === 'production';
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+    });
     res.status(200).json({
         success: true,
         message: 'Logged out successfully',

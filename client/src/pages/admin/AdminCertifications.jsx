@@ -10,6 +10,7 @@ import {
   useCreateCertificationMutation,
   useDeleteCertificationMutation,
 } from "../../redux/api/certificationApi"
+import { toFormData } from "../../utils/toFormData"
 
 const initialValues = { name: "", certificateImage: "", issuedBy: "", validTill: "", description: "" }
 
@@ -22,7 +23,7 @@ const AdminCertifications = () => {
   const items = data?.data || []
 
   const handleSubmit = (values, { resetForm }) => {
-    createCertification(values)
+    createCertification(toFormData(values))
       .unwrap()
       .then(() => {
         resetForm()
