@@ -34,25 +34,25 @@ const ProductDetail = () => {
       </div>
       <div>
         {product.category && (
-          <span className="mb-4 inline-block rounded-full bg-brand-100 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-700">
+          <span className="mb-4 inline-block rounded-full bg-brand-100 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-700 dark:bg-white/10 dark:text-brand-200">
             {product.category}
           </span>
         )}
-        <h1 className="text-3xl font-bold text-brand-900 sm:text-4xl">{product.name}</h1>
-        <p className="mt-4 text-2xl font-bold text-brand-600">
+        <h1 className="text-3xl font-bold text-brand-900 dark:text-white sm:text-4xl">{product.name}</h1>
+        <p className="mt-4 text-2xl font-bold text-brand-600 dark:text-accent-400">
           {product.price ? `₹${product.price} ${product.unit ? `/ ${product.unit}` : ""}` : "Enquire for price"}
         </p>
-        <p className="mt-6 leading-relaxed text-brand-900/70">
+        <p className="mt-6 leading-relaxed text-brand-900/70 dark:text-brand-200">
           {product.description ||
             "Premium quality, sourced directly from trusted farms and processed under strict quality control to ensure freshness and purity in every batch."}
         </p>
 
         {product.packagingOptions?.length > 0 && (
           <div className="mt-6">
-            <p className="mb-2 text-sm font-bold text-brand-900">Packaging Options</p>
+            <p className="mb-2 text-sm font-bold text-brand-900 dark:text-white">Packaging Options</p>
             <div className="flex flex-wrap gap-2">
               {product.packagingOptions.map((opt) => (
-                <span key={opt} className="flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700">
+                <span key={opt} className="flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 dark:bg-white/10 dark:text-brand-200">
                   <FiCheckCircle size={12} /> {opt}
                 </span>
               ))}
